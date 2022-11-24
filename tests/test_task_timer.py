@@ -1,6 +1,20 @@
 from datetime import timedelta
 
-from task_timer import TaskTimer
+from task_timer import TaskTimer, ParseTimeExpressionError
+
+
+class TestCustomExceptions:
+    def test_parse_time_expression_error(self):
+        try:
+            raise ParseTimeExpressionError('4xm50s')
+        except ParseTimeExpressionError as e:
+            assert str(e) == f"Could not parse time expression 4xm50s. "
+        
+        try:
+            raise ParseTimeExpressionError('4xm50s', "custom")
+        except ParseTimeExpressionError as e:
+            assert str(e) == f"Could not parse time expression 4xm50s. custom"
+
 
 class TestGetNiceTimeFormat:
     def test_seconds(self):
