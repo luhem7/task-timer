@@ -3,6 +3,19 @@ from datetime import timedelta
 from task_timer import TaskTimer, ParseTimeExpressionError
 
 
+class TestParseNiceTimeFormat:
+    def test_invalid_formats(self):
+        parse = TaskTimer.parse_friendly_timedelta
+
+        for invalid_str in ['', '45', '300m0', 'f']:
+            try:
+                parse(invalid_str)
+                assert False
+            except ParseTimeExpressionError as e:
+                assert str(e) == f"Could not parse time expression {invalid_str}. "
+                continue
+        
+
 class TestCustomExceptions:
     def test_parse_time_expression_error(self):
         try:

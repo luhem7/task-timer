@@ -1,11 +1,10 @@
+import argparse
+import os
+import sys
 import time
 from datetime import datetime, timedelta
-import sys
-import os
 from math import floor
 from typing import Union
-
-import argparse
 
 
 class ParseTimeExpressionError(Exception):
