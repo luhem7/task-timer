@@ -1,19 +1,32 @@
+import pytest
 from datetime import timedelta
 
 from task_timer import TaskTimer, ParseTimeExpressionError
 
 
-class TestParseNiceTimeFormat:
-    def test_invalid_formats(self):
-        parse = TaskTimer.parse_friendly_timedelta
+@pytest.fixture()
+def parse():
+    return TaskTimer.parse_friendly_timedelta
 
-        for invalid_str in ['', '45', '300m0', 'f']:
-            try:
-                parse(invalid_str)
-                assert False
-            except ParseTimeExpressionError as e:
-                assert str(e) == f"Could not parse time expression {invalid_str}. "
-                continue
+
+class TestParseNiceTimeFormat:
+
+    @pytest.mark.parametrize("time_str, seconds",
+    [
+        ('0s', 0), ('0m', 0), ('0h', 0), 
+        ('1h', 3600), ('1m', 60),('1s', 1),
+        ('1h1s', 3601), ('1m1s', 61),('1h1m', 3660),
+        ('1h1m1s', 3661), ('1m34s', 94),('1m61s', 121)
+    ])
+    def test_parse_valid_formats(self, time_str, seconds, parse):
+        assert parse(time_str) == seconds
+
+    @pytest.mark.parametrize("invalid_str", ('', '45', '300m0', 'f', '-10s', '1me10s'))
+    def test_invalid_formats(self, invalid_str, parse):
+        try:
+            parse(invalid_str)
+        except ParseTimeExpressionError as e:
+            assert str(e) == f"Could not parse time expression {invalid_str}. "
         
 
 class TestCustomExceptions:

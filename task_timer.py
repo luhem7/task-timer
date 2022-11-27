@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 import time
 from datetime import datetime, timedelta
@@ -43,6 +44,19 @@ class TaskTimer:
         """
         Parses strings of the form 50s or 1m40s and returns the total seconds represented by the string
         """
+        pattern = re.compile(r"(\d+h)?(\d+m)?(\d+s)?")
+
+        if pattern.fullmatch(input_str):
+            matches = pattern.search(input_str)
+
+            total_seconds = 0
+            for i in range(3):
+
+                time_sub_str = matches.group(i+1)
+                if time_sub_str is not None:
+                    total_seconds += int(time_sub_str[:-1]) * 60 ** (2-i)
+                    
+            return total_seconds
         raise ParseTimeExpressionError(input_str)
 
 
