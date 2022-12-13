@@ -61,11 +61,30 @@ class TaskTimer:
 
 
     def get_arg_parser() -> argparse.ArgumentParser:
-        parser = argparse.ArgumentParser(description='Sets a timer for a particular task with optional checkpoints and optional end time')
-        return parser
+        args_parser = argparse.ArgumentParser(description='Sets a timer for a particular task with optional checkpoints and optional end time')
+        args_parser.add_argument('-d', '--duration', help="How long the timer should run", type=str, required=True)
+        args_parser.add_argument('-c', '--checkpoint', help="The duration of a single checkpoint", type=str, required=True)
+        return args_parser
 
 
-    def __init__(self, checkpoint_duration : int = 5*60, timer_duration : int = 30*60):
+    def __init__(self, checkpoint_duration_str : str, timer_duration_str : str):
+        checkpoint_duration, timer_duration = None, None
+
+        try:
+            checkpoint_duration = TaskTimer.parse_friendly_timedelta(checkpoint_duration_str)
+        except ParseTimeExpressionError as e:
+            print('Error parsing the duration for checkpoint:')
+            print(e)
+            sys.exit(1)
+        
+        try:
+            timer_duration = TaskTimer.parse_friendly_timedelta(timer_duration_str)
+        except ParseTimeExpressionError as e:
+            print('Error parsing the duration for the timer:')
+            print(e)
+            sys.exit(1)
+
+
         self.reset_timer()
         self._checkpoint_duration = checkpoint_duration
         self._timer_duration = timer_duration
@@ -117,7 +136,9 @@ class TaskTimer:
             
 
 if __name__ == "__main__":
-    task_timer = TaskTimer(checkpoint_duration=5*60, timer_duration=50*60)
+    args = TaskTimer.get_arg_parser().parse_args()
+
+    task_timer = TaskTimer(checkpoint_duration_str=args.checkpoint, timer_duration_str=args.duration)
     task_timer.start_timer()
 
     sys.exit(0)
